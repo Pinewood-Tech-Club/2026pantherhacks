@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="288" height="48" viewBox="0 0 288 48" fill="none">
+  <rect x="0.5" y="0.5" width="287" height="47" rx="12" fill="#FFFFFF" stroke="#D8E1DC"/>
+  <rect x="10" y="10" width="28" height="28" rx="8" fill="#1F9D63"/>
+  <path d="M18 18H30V22H26V30H22V22H18V18Z" fill="#FFFFFF"/>
+  <text x="48" y="21" fill="#121A22" font-size="10" font-family="Arial, sans-serif" letter-spacing="1.4">PANTHER HACKS</text>
+  <text x="48" y="35" fill="#121A22" font-size="15" font-weight="700" font-family="Arial, sans-serif">2026 WORDMARK</text>
+</svg>
