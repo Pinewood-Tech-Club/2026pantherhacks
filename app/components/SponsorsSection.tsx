@@ -7,7 +7,7 @@ import { SectionHeader } from "./SectionHeader";
 import { useMotionPresets } from "./useMotionPresets";
 
 export function SponsorsSection() {
-  const { reveal, cardHover, staggerContainer, staggerItem } = useMotionPresets();
+  const { reveal, cardHover, staggerContainer, staggerItemWithHover } = useMotionPresets();
 
   const titleSponsor = LARGE_SPONSORS.find((s) => s.tier === "title");
   const majorSponsors = LARGE_SPONSORS.filter((s) => s.tier === "major");
@@ -24,8 +24,7 @@ export function SponsorsSection() {
           <motion.a
             href={titleSponsor.href}
             className="group relative block overflow-hidden rounded-xl bg-white p-5 sm:p-6"
-            {...staggerItem}
-            {...cardHover}
+            {...staggerItemWithHover}
           >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
               <div className="flex h-16 shrink-0 items-center rounded-lg bg-[color:var(--surface-soft)] px-4 sm:h-20 sm:w-56">
@@ -60,8 +59,7 @@ export function SponsorsSection() {
                 key={sponsor.name}
                 href={sponsor.href}
                 className="group flex items-center gap-4 rounded-xl bg-white p-4 sm:p-5"
-                {...staggerItem}
-                {...cardHover}
+                {...staggerItemWithHover}
               >
                 <div className="flex h-14 w-20 shrink-0 items-center rounded-lg bg-[color:var(--surface-soft)] px-2.5">
                   <Image
@@ -91,8 +89,7 @@ export function SponsorsSection() {
                 key={sponsor.name}
                 href={sponsor.href}
                 className="flex items-center gap-3 rounded-xl bg-white p-3 sm:flex-col sm:items-start sm:gap-0 sm:p-4"
-                {...staggerItem}
-                {...cardHover}
+                {...staggerItemWithHover}
               >
                 <Image
                   src={sponsor.icon}

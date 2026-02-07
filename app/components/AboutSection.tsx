@@ -13,7 +13,7 @@ const INFO_CARDS = [
 ] as const;
 
 export function AboutSection() {
-  const { reveal, cardHover, staggerContainer, staggerItem } = useMotionPresets();
+  const { reveal, staggerContainer, staggerItemWithHover } = useMotionPresets();
 
   return (
     <motion.section id="about" className="section-anchor" {...reveal}>
@@ -23,7 +23,7 @@ export function AboutSection() {
       />
 
       <motion.div className="grid gap-3 sm:gap-4 lg:grid-cols-2" {...staggerContainer}>
-        <motion.article className="rounded-lg bg-white p-4 sm:p-6" {...staggerItem} {...cardHover}>
+        <motion.article className="rounded-lg bg-white p-4 sm:p-6" {...staggerItemWithHover}>
           <h3 className="font-display text-xl font-semibold text-[color:var(--text)] sm:text-2xl">The rundown</h3>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
             {INFO_CARDS.map((card) => (
@@ -39,7 +39,7 @@ export function AboutSection() {
           </p>
         </motion.article>
 
-        <motion.article className="rounded-lg bg-white p-4 sm:p-6" {...staggerItem} {...cardHover}>
+        <motion.article className="rounded-lg bg-white p-4 sm:p-6" {...staggerItemWithHover}>
           <h3 className="font-display text-xl font-semibold text-[color:var(--text)] sm:text-2xl">Schedule</h3>
           <div className="mt-3 space-y-2">
             {SCHEDULE.map((item) => (
