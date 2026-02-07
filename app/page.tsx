@@ -15,10 +15,22 @@ import { getCountdown, padCountdown } from "./lib/countdown";
 import type { Countdown, CountdownItem } from "./types/site";
 
 export default function Home() {
-  const [countdown, setCountdown] = useState<Countdown>(() => getCountdown());
+  const [mounted, setMounted] = useState(false);
+  const [countdown, setCountdown] = useState<Countdown>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    isLive: false,
+  });
 
   useEffect(() => {
-    if (countdown.isLive) {
+    setMounted(true);
+    setCountdown(getCountdown());
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || countdown.isLive) {
       return;
     }
 
@@ -27,16 +39,23 @@ export default function Home() {
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [countdown.isLive]);
+  }, [mounted, countdown.isLive]);
 
-  const countdownItems: CountdownItem[] = countdown.isLive
-    ? [{ label: "Status", value: "Live" }]
-    : [
-        { label: "Days", value: padCountdown(countdown.days) },
-        { label: "Hours", value: padCountdown(countdown.hours) },
-        { label: "Min", value: padCountdown(countdown.minutes) },
-        { label: "Sec", value: padCountdown(countdown.seconds) },
-      ];
+  const countdownItems: CountdownItem[] = !mounted
+    ? [
+        { label: "Days", value: "--" },
+        { label: "Hours", value: "--" },
+        { label: "Min", value: "--" },
+        { label: "Sec", value: "--" },
+      ]
+    : countdown.isLive
+      ? [{ label: "Status", value: "Live" }]
+      : [
+          { label: "Days", value: padCountdown(countdown.days) },
+          { label: "Hours", value: padCountdown(countdown.hours) },
+          { label: "Min", value: padCountdown(countdown.minutes) },
+          { label: "Sec", value: padCountdown(countdown.seconds) },
+        ];
 
   return (
     <div className="site-wrap">
