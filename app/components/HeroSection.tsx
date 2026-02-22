@@ -1,96 +1,326 @@
-import Image from "next/image";
-import { ArrowRight, MapPin } from "lucide-react";
-import { motion } from "motion/react";
+"use client";
+
+import { ArrowRight } from "lucide-react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { useRef } from "react";
 
 import type { CountdownItem } from "../types/site";
-import { useMotionPresets } from "./useMotionPresets";
 
 type HeroSectionProps = {
   countdownItems: CountdownItem[];
+  onEasterEgg?: () => void;
 };
 
-export function HeroSection({ countdownItems }: HeroSectionProps) {
-  const { heroReveal, heroImageReveal } = useMotionPresets();
+// Animate each word with staggered reveal
+function AnimatedTitle({ onEasterEgg }: { onEasterEgg?: () => void }) {
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const line1 = ["Build", "something"];
+
+  function handleRealClick() {
+    clickCountRef.current++;
+    // Reset counter if user stops clicking for 3 seconds
+    clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 3000);
+
+    if (clickCountRef.current >= 10) {
+      clickCountRef.current = 0;
+      onEasterEgg?.();
+    }
+  }
 
   return (
-    <section className="section-anchor">
-      <div className="grid gap-5 sm:gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
-        <motion.div {...heroReveal} className="flex flex-col justify-between">
-          <div>
-            <a
-              href="https://maps.google.com/?q=Pinewood+School,+26800+Fremont+Rd,+Los+Altos+Hills,+CA+94022"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="accent-chip gap-1.5 hover:bg-[color:var(--accent)] hover:text-white"
-            >
-              <MapPin size={13} />
-              April 19, 2026 | Pinewood Upper Campus
-            </a>
-            <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-[color:var(--text)] sm:text-5xl lg:text-[3.3rem]">
-              Build something real in one day.
-            </h1>
-            <p className="mt-3 max-w-xl text-base text-[color:var(--muted)] sm:mt-4 sm:text-lg">
-              A free hackathon for middle and high schoolers, run by the Pinewood Tech Club. All skill levels welcome — no experience required.
-            </p>
-          </div>
+    <h1
+      className="mt-6 font-display font-normal italic leading-[0.92] sm:mt-8"
+      style={{ fontSize: "clamp(3rem, 10vw, 9rem)" }}
+    >
+      <span className="block overflow-hidden">
+        {line1.map((word, i) => (
+          <motion.span
+            key={word}
+            className="mr-[0.25em] inline-block"
+            style={{ color: "var(--text)" }}
+            initial={{ y: "110%", rotateX: -40 }}
+            animate={{ y: "0%", rotateX: 0 }}
+            transition={{
+              duration: 1,
+              delay: 0.3 + i * 0.08,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            {word}
+          </motion.span>
+        ))}
+      </span>
+      <span className="block overflow-hidden">
+        <motion.span
+          className="mr-[0.25em] inline-block cursor-pointer select-none"
+          style={{ color: "var(--green)" }}
+          initial={{ y: "110%", rotateX: -40 }}
+          animate={{ y: "0%", rotateX: 0 }}
+          transition={{
+            duration: 1,
+            delay: 0.5,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          onClick={handleRealClick}
+        >
+          real
+        </motion.span>
+        <motion.span
+          className="mr-[0.25em] inline-block"
+          style={{ color: "var(--text)" }}
+          initial={{ y: "110%", rotateX: -40 }}
+          animate={{ y: "0%", rotateX: 0 }}
+          transition={{
+            duration: 1,
+            delay: 0.58,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+        >
+          in one day.
+        </motion.span>
+      </span>
+    </h1>
+  );
+}
 
-          <div className="mt-5 flex flex-wrap gap-3 sm:mt-6">
-            <a
-              href="about:blank"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[color:var(--accent)] px-6 text-sm font-semibold text-white hover:bg-[color:var(--accent-strong)]"
-            >
-              Register Now
-              <ArrowRight size={15} />
-            </a>
-            <a
-              href="#about"
-              className="inline-flex min-h-11 items-center justify-center rounded-md bg-[color:var(--surface-soft)] px-6 text-sm font-semibold text-[color:var(--text)] hover:bg-[color:#e5ebe8]"
-            >
-              View Schedule
-            </a>
-          </div>
+export function HeroSection({ countdownItems, onEasterEgg }: HeroSectionProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  const titleY = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const subtitleY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const countdownY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const bgOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
+
+  return (
+    <section
+      ref={containerRef}
+      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden px-4 sm:px-6"
+    >
+      {/* Background gradient orbs */}
+      <motion.div style={{ opacity: bgOpacity }}>
+        <motion.div
+          className="absolute left-[-20%] top-[10%] h-[600px] w-[600px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(45, 208, 122, 0.12) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+          animate={{
+            x: [0, 30, -20, 0],
+            y: [0, -40, 20, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-[5%] right-[-10%] h-[500px] w-[500px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(219, 167, 62, 0.08) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+          animate={{
+            x: [0, -30, 15, 0],
+            y: [0, 30, -20, 0],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </motion.div>
+
+      {/* Content */}
+      <motion.div
+        className="relative z-10 mx-auto w-full max-w-6xl pt-24 sm:pt-32"
+        style={{ scale, y: titleY }}
+      >
+        {/* Date pill */}
+        <motion.div
+          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <a
+            href="https://maps.google.com/?q=Pinewood+School,+26800+Fremont+Rd,+Los+Altos+Hills,+CA+94022"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] sm:text-sm"
+            style={{
+              color: "var(--green)",
+              background: "var(--green-glow)",
+              border: "1px solid var(--line-strong)",
+            }}
+          >
+            <motion.span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: "var(--green)" }}
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            April 19, 2026 &middot; Pinewood Upper Campus
+          </a>
         </motion.div>
 
+        {/* Title with word-by-word reveal */}
+        <AnimatedTitle onEasterEgg={onEasterEgg} />
+
+        {/* Subtitle */}
+        <motion.p
+          className="mt-5 max-w-lg text-base leading-relaxed sm:mt-7 sm:text-lg"
+          style={{ color: "var(--text-secondary)", y: subtitleY }}
+          initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{
+            duration: 0.9,
+            ease: [0.16, 1, 0.3, 1],
+            delay: 0.6,
+          }}
+        >
+          A free hackathon for middle &amp; high schoolers. No experience needed.
+          Build a project, demo to judges, compete for prizes.
+        </motion.p>
+
+        {/* CTA */}
         <motion.div
-          initial={heroReveal.initial}
-          animate={heroReveal.animate}
-          transition={{ ...heroReveal.transition, delay: 0.04 }}
-          className="relative min-h-[220px] overflow-hidden rounded-lg sm:min-h-[280px] lg:min-h-0"
+          className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9 sm:gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.9,
+            ease: [0.16, 1, 0.3, 1],
+            delay: 0.75,
+          }}
+        >
+          <motion.a
+            href="about:blank"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-7 text-sm font-semibold text-white sm:min-h-14 sm:px-9 sm:text-base"
+            style={{
+              background: "var(--green)",
+              boxShadow: "0 0 30px rgba(45, 208, 122, 0.15)",
+            }}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: "0 0 40px rgba(45, 208, 122, 0.25)",
+            }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+          >
+            Register Now
+            <ArrowRight
+              size={16}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
+          </motion.a>
+          <a
+            href="#about"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl px-7 text-sm font-semibold sm:min-h-14 sm:px-9 sm:text-base"
+            style={{
+              color: "var(--text)",
+              border: "1px solid var(--line-strong)",
+              background: "var(--green-glow)",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.borderColor = "var(--green)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.borderColor = "var(--line-strong)")
+            }
+          >
+            Learn More
+          </a>
+        </motion.div>
+
+        {/* Countdown */}
+        <motion.div
+          className="mt-14 sm:mt-20"
+          style={{ y: countdownY }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.9,
+            ease: [0.16, 1, 0.3, 1],
+            delay: 0.9,
+          }}
+        >
+          <p
+            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] sm:mb-4 sm:text-xs"
+            style={{ color: "var(--text-dim)" }}
+          >
+            Countdown
+          </p>
+          <div className="inline-flex gap-3 sm:gap-4">
+            {countdownItems.map((item, i) => (
+              <motion.div
+                key={item.label}
+                className="flex flex-col items-center rounded-xl px-4 py-3 sm:px-6 sm:py-4"
+                style={{
+                  background: "rgba(15, 22, 19, 0.8)",
+                  border: "1px solid var(--line)",
+                  backdropFilter: "blur(12px)",
+                }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  duration: 0.6,
+                  delay: 1 + i * 0.08,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+              >
+                <span
+                  className="metric-value font-display text-3xl font-normal italic sm:text-4xl"
+                  style={{ color: "var(--green)" }}
+                >
+                  {item.value}
+                </span>
+                <span
+                  className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] sm:text-xs"
+                  style={{ color: "var(--text-dim)" }}
+                >
+                  {item.label}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Scroll indicator — animated vertical line */}
+      <motion.div
+        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 0.8 }}
+      >
+        <span
+          className="text-[10px] font-semibold uppercase tracking-[0.25em]"
+          style={{ color: "var(--text-dim)" }}
+        >
+          Scroll
+        </span>
+        <div
+          className="relative h-12 w-px overflow-hidden"
+          style={{ background: "var(--line)" }}
         >
           <motion.div
-            className="absolute inset-0"
-            {...heroImageReveal}
-            transition={{ ...heroImageReveal.transition, delay: 0.08 }}
-          >
-            <Image
-              src="/images/hero-unsplash.jpg"
-              alt="Students collaborating during a coding event"
-              fill
-              sizes="(max-width: 1024px) 100vw, 56vw"
-              className="object-cover"
-              priority
-            />
-          </motion.div>
-
-          <div className="absolute bottom-3 left-3 right-3 rounded-md bg-white/70 p-2.5 backdrop-blur sm:bottom-4 sm:left-4 sm:right-4 sm:p-3">
-            <p className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--text)] sm:text-xs">Countdown</p>
-            <div className={`mt-1.5 grid gap-1.5 sm:mt-2 sm:gap-2 ${countdownItems.length === 1 ? "grid-cols-1" : "grid-cols-4"}`}>
-              {countdownItems.map((item) => (
-                <div key={item.label} className="rounded-md px-1.5 py-1.5 text-center sm:px-2 sm:py-2">
-                  <p className="metric-value font-display text-xl font-semibold text-[color:var(--accent)] sm:text-2xl">
-                    {item.value}
-                  </p>
-                  <p className="text-[9px] uppercase tracking-[0.12em] text-[color:var(--text)] sm:text-[11px]">
-                    {item.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      </div>
+            className="absolute left-0 top-0 w-full"
+            style={{ background: "var(--green)", height: "50%" }}
+            animate={{ y: ["-100%", "200%"] }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+      </motion.div>
     </section>
   );
 }

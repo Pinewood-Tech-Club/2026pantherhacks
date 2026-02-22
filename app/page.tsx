@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useState } from "react";
 
 import { AboutSection } from "./components/AboutSection";
 import { FaqSection } from "./components/FaqSection";
 import { HeroSection } from "./components/HeroSection";
+import { LenisProvider } from "./components/LenisProvider";
 import { LinksSection } from "./components/LinksSection";
 import { Navbar } from "./components/Navbar";
 import { PrizesSection } from "./components/PrizesSection";
@@ -14,8 +16,18 @@ import { TeamSection } from "./components/TeamSection";
 import { getCountdown, padCountdown } from "./lib/countdown";
 import type { Countdown, CountdownItem } from "./types/site";
 
+// Lazy load Game of Life canvas to avoid SSR issues
+const GameOfLife = dynamic(
+  () =>
+    import("./components/GameOfLife").then((mod) => ({
+      default: mod.GameOfLife,
+    })),
+  { ssr: false }
+);
+
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [interactiveMode, setInteractiveMode] = useState(false);
   const [countdown, setCountdown] = useState<Countdown>({
     days: 0,
     hours: 0,
@@ -41,6 +53,18 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [mounted, countdown.isLive]);
 
+  const handleEasterEgg = useCallback(() => {
+    setInteractiveMode(true);
+    // Scroll to top and disable scrolling
+    window.scrollTo({ top: 0, behavior: "instant" });
+    document.body.style.overflow = "hidden";
+  }, []);
+
+  const handleExitInteractive = useCallback(() => {
+    setInteractiveMode(false);
+    document.body.style.overflow = "";
+  }, []);
+
   const countdownItems: CountdownItem[] = !mounted
     ? [
         { label: "Days", value: "--" },
@@ -49,7 +73,7 @@ export default function Home() {
         { label: "Sec", value: "--" },
       ]
     : countdown.isLive
-      ? [{ label: "Status", value: "Live" }]
+      ? [{ label: "Status", value: "LIVE" }]
       : [
           { label: "Days", value: padCountdown(countdown.days) },
           { label: "Hours", value: padCountdown(countdown.hours) },
@@ -58,20 +82,56 @@ export default function Home() {
         ];
 
   return (
-    <div className="site-wrap">
-      <Navbar />
+    <LenisProvider>
+      <div className="relative">
+        {/* Conway's Game of Life background */}
+        <GameOfLife
+          interactive={interactiveMode}
+          onExitInteractive={handleExitInteractive}
+        />
 
-      <main id="top" className="mx-auto flex max-w-6xl flex-col gap-12 px-4 pb-16 pt-24 sm:gap-16 sm:px-6 sm:pb-24 sm:pt-32">
-        <HeroSection countdownItems={countdownItems} />
-        <AboutSection />
-        <SponsorsSection />
-        <PrizesSection />
-        <FaqSection />
-        <TeamSection />
-        <LinksSection />
-      </main>
+        {/* All site content fades out in interactive mode */}
+        <div
+          style={{
+            opacity: interactiveMode ? 0 : 1,
+            pointerEvents: interactiveMode ? "none" : "auto",
+            transition: "opacity 0.6s ease",
+          }}
+        >
+          {/* Floating register button — appears on scroll */}
+          <Navbar />
 
-      <SiteFooter />
-    </div>
+          {/* Hero — full viewport */}
+          <div id="top">
+            <HeroSection
+              countdownItems={countdownItems}
+              onEasterEgg={handleEasterEgg}
+            />
+          </div>
+
+          {/* Main content sections */}
+          <main className="relative z-10 mx-auto flex max-w-6xl flex-col gap-28 px-4 pb-24 pt-20 sm:gap-40 sm:px-6 sm:pb-36 sm:pt-28">
+            {/* Decorative vertical line from hero to content */}
+            <div
+              className="pointer-events-none absolute left-1/2 top-0 h-40 w-px -translate-x-1/2"
+              style={{
+                background:
+                  "linear-gradient(to bottom, var(--green), transparent)",
+                opacity: 0.15,
+              }}
+            />
+
+            <AboutSection />
+            <PrizesSection />
+            <SponsorsSection />
+            <FaqSection />
+            <TeamSection />
+            <LinksSection />
+          </main>
+
+          <SiteFooter />
+        </div>
+      </div>
+    </LenisProvider>
   );
 }

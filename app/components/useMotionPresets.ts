@@ -6,71 +6,90 @@ export function useMotionPresets() {
   const reducedMotion = useReducedMotion();
 
   const reveal = {
-    initial: { opacity: 0, y: reducedMotion ? 0 : 12 },
+    initial: { opacity: 0, y: reducedMotion ? 0 : 60 },
     whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.22 },
-    transition: { duration: reducedMotion ? 0 : 0.38, ease: [0.22, 1, 0.36, 1] as const },
+    viewport: { once: true, amount: 0.12 },
+    transition: { duration: reducedMotion ? 0 : 0.9, ease: [0.16, 1, 0.3, 1] as const },
   };
 
-  const cardHover = reducedMotion
-    ? {}
-    : {
-        whileHover: { y: -3, boxShadow: "0 8px 24px rgba(16, 26, 34, 0.10)" },
-        transition: { duration: 0.2, ease: "easeOut" as const },
-      };
+  const fadeIn = {
+    initial: { opacity: 0 },
+    whileInView: { opacity: 1 },
+    viewport: { once: true, amount: 0.12 },
+    transition: { duration: reducedMotion ? 0 : 0.8, ease: "easeOut" as const },
+  };
 
   const heroReveal = {
-    initial: { opacity: 0, y: reducedMotion ? 0 : 8 },
+    initial: { opacity: 0, y: reducedMotion ? 0 : 30 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: reducedMotion ? 0 : 0.34, ease: "easeOut" as const },
+    transition: { duration: reducedMotion ? 0 : 1, ease: [0.16, 1, 0.3, 1] as const },
   };
 
-  const heroImageReveal = {
-    initial: { opacity: 0, scale: reducedMotion ? 1 : 1.03 },
-    animate: { opacity: 1, scale: 1 },
-    transition: { duration: reducedMotion ? 0 : 0.6, ease: [0.22, 1, 0.36, 1] as const },
+  const heroTitle = {
+    initial: { opacity: 0, y: reducedMotion ? 0 : 80 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: reducedMotion ? 0 : 1.2, ease: [0.16, 1, 0.3, 1] as const, delay: 0.15 },
+  };
+
+  const scaleReveal = {
+    initial: { opacity: 0, scale: reducedMotion ? 1 : 0.92 },
+    whileInView: { opacity: 1, scale: 1 },
+    viewport: { once: true, amount: 0.12 },
+    transition: { duration: reducedMotion ? 0 : 0.9, ease: [0.16, 1, 0.3, 1] as const },
   };
 
   const staggerContainer = {
     variants: {
       hidden: {},
-      visible: {
-        transition: { staggerChildren: reducedMotion ? 0 : 0.07 },
-      },
+      visible: { transition: { staggerChildren: reducedMotion ? 0 : 0.1 } },
     },
     initial: "hidden" as const,
     whileInView: "visible" as const,
-    viewport: { once: true, amount: 0.1 },
+    viewport: { once: true, amount: 0.06 },
   };
 
   const staggerItem = {
     variants: {
-      hidden: { opacity: 0, y: reducedMotion ? 0 : 16 },
+      hidden: { opacity: 0, y: reducedMotion ? 0 : 40 },
       visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: reducedMotion ? 0 : 0.38, ease: [0.22, 1, 0.36, 1] as const },
+        transition: { duration: reducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] as const },
       },
     },
   };
 
   const staggerItemWithHover = {
     variants: {
-      hidden: { opacity: 0, y: reducedMotion ? 0 : 16 },
+      hidden: { opacity: 0, y: reducedMotion ? 0 : 40 },
       visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: reducedMotion ? 0 : 0.38, ease: [0.22, 1, 0.36, 1] as const },
+        transition: { duration: reducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] as const },
       },
     },
     ...(reducedMotion ? {} : {
-      whileHover: {
-        y: -3,
-        boxShadow: "0 8px 24px rgba(16, 26, 34, 0.10)",
-        transition: { duration: 0.2, ease: "easeOut" as const },
-      },
+      whileHover: { y: -6, transition: { duration: 0.3, ease: "easeOut" as const } },
     }),
   };
 
-  return { reveal, cardHover, heroReveal, heroImageReveal, staggerContainer, staggerItem, staggerItemWithHover };
+  const slideLeft = {
+    initial: { opacity: 0, x: reducedMotion ? 0 : -60 },
+    whileInView: { opacity: 1, x: 0 },
+    viewport: { once: true, amount: 0.12 },
+    transition: { duration: reducedMotion ? 0 : 0.9, ease: [0.16, 1, 0.3, 1] as const },
+  };
+
+  const slideRight = {
+    initial: { opacity: 0, x: reducedMotion ? 0 : 60 },
+    whileInView: { opacity: 1, x: 0 },
+    viewport: { once: true, amount: 0.12 },
+    transition: { duration: reducedMotion ? 0 : 0.9, ease: [0.16, 1, 0.3, 1] as const },
+  };
+
+  return {
+    reveal, fadeIn, heroReveal, heroTitle, scaleReveal,
+    staggerContainer, staggerItem, staggerItemWithHover,
+    slideLeft, slideRight,
+  };
 }
