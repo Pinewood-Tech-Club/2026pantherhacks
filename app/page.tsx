@@ -49,7 +49,7 @@ export default function Home() {
         { label: "Sec", value: "--" },
       ]
     : countdown.isLive
-      ? [{ label: "Status", value: "Live" }]
+      ? [{ label: "Status", value: "LIVE" }]
       : [
           { label: "Days", value: padCountdown(countdown.days) },
           { label: "Hours", value: padCountdown(countdown.hours) },
@@ -58,16 +58,45 @@ export default function Home() {
         ];
 
   return (
-    <div className="site-wrap">
+    <div className="relative">
       <Navbar />
 
-      <main id="top" className="mx-auto flex max-w-6xl flex-col gap-12 px-4 pb-16 pt-24 sm:gap-16 sm:px-6 sm:pb-24 sm:pt-32">
+      {/* Hero — full viewport */}
+      <div id="top">
         <HeroSection countdownItems={countdownItems} />
+      </div>
+
+      {/* Main content sections */}
+      <main className="relative mx-auto flex max-w-6xl flex-col gap-24 px-4 pb-20 pt-16 sm:gap-32 sm:px-6 sm:pb-32 sm:pt-24">
+        {/* Decorative vertical line */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 h-32 w-px -translate-x-1/2"
+          style={{
+            background: "linear-gradient(to bottom, var(--green), transparent)",
+            opacity: 0.2,
+          }}
+        />
+
         <AboutSection />
-        <SponsorsSection />
+
+        <div className="divider" />
+
         <PrizesSection />
+
+        <div className="divider" />
+
+        <SponsorsSection />
+
+        <div className="divider" />
+
         <FaqSection />
+
+        <div className="divider" />
+
         <TeamSection />
+
+        <div className="divider" />
+
         <LinksSection />
       </main>
 
