@@ -1,5 +1,7 @@
-import { motion } from "motion/react";
-import { useMotionPresets } from "./useMotionPresets";
+"use client";
+
+import { motion, useScroll, useTransform } from "motion/react";
+import { useRef } from "react";
 
 type SectionHeaderProps = {
   title: string;
@@ -8,34 +10,48 @@ type SectionHeaderProps = {
 };
 
 export function SectionHeader({ title, description, label }: SectionHeaderProps) {
-  const { reveal } = useMotionPresets();
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 0.9", "start 0.3"],
+  });
+
+  const titleY = useTransform(scrollYProgress, [0, 1], [40, 0]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
+  const descOpacity = useTransform(scrollYProgress, [0.2, 0.8], [0, 1]);
+  const descY = useTransform(scrollYProgress, [0.2, 0.8], [20, 0]);
+  const lineWidth = useTransform(scrollYProgress, [0, 0.5], ["0%", "100%"]);
 
   return (
-    <motion.div className="mb-10 sm:mb-14" {...reveal}>
+    <div ref={ref} className="mb-12 sm:mb-16">
       {label ? (
-        <span
-          className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] sm:mb-4"
-          style={{
-            color: "var(--green)",
-            background: "var(--green-glow)",
-            border: "1px solid var(--line-strong)",
-          }}
+        <motion.div
+          className="section-label mb-5 sm:mb-6"
+          style={{ opacity: descOpacity }}
         >
           {label}
-        </span>
+        </motion.div>
       ) : null}
-      <h2
-        className="font-display text-4xl font-normal italic sm:text-5xl lg:text-6xl"
-        style={{ color: "var(--text)" }}
+      <motion.h2
+        className="font-display text-4xl font-normal italic sm:text-5xl lg:text-6xl xl:text-7xl"
+        style={{ color: "var(--text)", y: titleY, opacity: titleOpacity }}
       >
         {title}
-      </h2>
-      <p
-        className="mt-3 max-w-2xl text-base sm:mt-4 sm:text-lg"
-        style={{ color: "var(--text-secondary)" }}
+      </motion.h2>
+      <motion.div
+        className="mt-4 h-px"
+        style={{
+          background: "linear-gradient(to right, var(--green), transparent)",
+          opacity: 0.3,
+          width: lineWidth,
+        }}
+      />
+      <motion.p
+        className="mt-4 max-w-xl text-base sm:mt-5 sm:text-lg"
+        style={{ color: "var(--text-secondary)", opacity: descOpacity, y: descY }}
       >
         {description}
-      </p>
-    </motion.div>
+      </motion.p>
+    </div>
   );
 }
