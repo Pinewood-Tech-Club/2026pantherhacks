@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 
 import { AboutSection } from "./components/AboutSection";
 import { FaqSection } from "./components/FaqSection";
@@ -16,6 +16,53 @@ import { TeamSection } from "./components/TeamSection";
 import { getCountdown, padCountdown } from "./lib/countdown";
 import type { Countdown, CountdownItem } from "./types/site";
 
+const SERVER_COUNTDOWN: Countdown = {
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+  isLive: false,
+};
+
+let countdownSnapshot: Countdown = SERVER_COUNTDOWN;
+
+function subscribeNever() {
+  return () => {};
+}
+
+function subscribeCountdown(onStoreChange: () => void) {
+  const timer = window.setInterval(onStoreChange, 1000);
+  return () => window.clearInterval(timer);
+}
+
+function getCountdownSnapshot(): Countdown {
+  const next = getCountdown();
+  const prev = countdownSnapshot;
+  if (
+    prev.days === next.days &&
+    prev.hours === next.hours &&
+    prev.minutes === next.minutes &&
+    prev.seconds === next.seconds &&
+    prev.isLive === next.isLive
+  ) {
+    return prev;
+  }
+  countdownSnapshot = next;
+  return next;
+}
+
+function getServerCountdownSnapshot(): Countdown {
+  return SERVER_COUNTDOWN;
+}
+
+function getClientMounted() {
+  return true;
+}
+
+function getServerMounted() {
+  return false;
+}
+
 // Lazy load Game of Life canvas to avoid SSR issues
 const GameOfLife = dynamic(
   () =>
@@ -26,32 +73,17 @@ const GameOfLife = dynamic(
 );
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    subscribeNever,
+    getClientMounted,
+    getServerMounted
+  );
+  const countdown = useSyncExternalStore(
+    subscribeCountdown,
+    getCountdownSnapshot,
+    getServerCountdownSnapshot
+  );
   const [interactiveMode, setInteractiveMode] = useState(false);
-  const [countdown, setCountdown] = useState<Countdown>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-    isLive: false,
-  });
-
-  useEffect(() => {
-    setMounted(true);
-    setCountdown(getCountdown());
-  }, []);
-
-  useEffect(() => {
-    if (!mounted || countdown.isLive) {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setCountdown(getCountdown());
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [mounted, countdown.isLive]);
 
   const handleEasterEgg = useCallback(() => {
     setInteractiveMode(true);
